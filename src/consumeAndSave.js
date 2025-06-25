@@ -15,10 +15,34 @@ async function consumeAndSave() {
           'INSERT INTO productos (id, nombre, precio) VALUES (?, ?, ?)',
           [item.id, item.nombre, item.precio]
         );
+        // para tener datos guardaos extra
+        await db.query(
+          'INSERT INTO usuarios (nombre, apellido, extras) VALUES (?, ?, ?)',
+          [nombre, apellido, JSON.stringify(extras)]
+        );
       } else {
         console.log('❌ Producto inválido omitido:', item);
       }
     }
+
+    //antes de guardar verificar 
+    for (const usuario of usuarios) {
+  const [rows] = await db.query(
+    'SELECT * FROM usuarios WHERE nombre = ? AND apellido = ?',
+    [usuario.nombre, usuario.apellido]
+  );
+
+  if (rows.length === 0) {
+    // No existe, insertamos
+    await db.query(
+      'INSERT INTO usuarios (nombre, apellido) VALUES (?, ?)',
+      [usuario.nombre, usuario.apellido]
+    );
+    console.log(`Usuario ${usuario.nombre} agregado`);
+  } else {
+    console.log(`Usuario ${usuario.nombre} ya existe`);
+  }
+}
 
     console.log('✅ Productos guardados en la base de datos');
   } catch (error) {
